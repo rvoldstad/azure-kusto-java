@@ -3,6 +3,7 @@ package com.microsoft.azure.kusto.data;
 import com.microsoft.azure.kusto.data.exceptions.DataClientException;
 import com.microsoft.azure.kusto.data.exceptions.DataServiceException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.HttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -21,6 +22,7 @@ public class ClientImpl implements Client {
     private String clusterUrl;
     private String clientVersionForTracing;
     private String applicationNameForTracing;
+    private HttpClient httpClient;
 
     public ClientImpl(ConnectionStringBuilder csb) throws URISyntaxException {
         clusterUrl = csb.getClusterUrl();
@@ -35,6 +37,11 @@ public class ClientImpl implements Client {
             clientVersionForTracing += "[" + csb.getClientVersionForTracing() + "]";
         }
         applicationNameForTracing = csb.getApplicationNameForTracing();
+    }
+
+    public ClientImpl(ConnectionStringBuilder csb, HttpClient httpClient) throws URISyntaxException {
+        this(csb);
+        this.httpClient = httpClient;
     }
 
     public Results execute(String command) throws DataServiceException, DataClientException {
@@ -86,6 +93,6 @@ public class ClientImpl implements Client {
             throw new DataClientException(clusterEndpoint, String.format(clusterEndpoint, "Error in executing command: %s, in database: %s", command, database), e);
         }
 
-        return Utils.post(clusterEndpoint, aadAccessToken, jsonString, timeoutMs.intValue(), clientVersionForTracing, applicationNameForTracing);
+        return Utils.post(clusterEndpoint, aadAccessToken, jsonString, timeoutMs.intValue(), clientVersionForTracing, applicationNameForTracing, httpClient);
     }
 }

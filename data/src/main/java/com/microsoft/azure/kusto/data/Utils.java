@@ -25,14 +25,16 @@ import java.util.HashMap;
 
 class Utils {
 
-    static Results post(String url, String aadAccessToken, String payload, Integer timeoutMs, String clientVersionForTracing, String applicationNameForTracing) throws DataServiceException, DataClientException {
+    static Results post(String url, String aadAccessToken, String payload, Integer timeoutMs,
+        String clientVersionForTracing, String applicationNameForTracing, HttpClient httpClient) throws DataServiceException, DataClientException {
 
-        HttpClient httpClient;
-        if (timeoutMs != null) {
-            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(timeoutMs).build();
-            httpClient = HttpClientBuilder.create().useSystemProperties().setDefaultRequestConfig(requestConfig).build();
-        } else {
-            httpClient = HttpClients.createSystem();
+        if(httpClient == null) {
+            if (timeoutMs != null) {
+                RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(timeoutMs).build();
+                httpClient = HttpClientBuilder.create().useSystemProperties().setDefaultRequestConfig(requestConfig).build();
+            } else {
+                httpClient = HttpClients.createSystem();
+            }
         }
 
         HttpPost httpPost = new HttpPost(url);
